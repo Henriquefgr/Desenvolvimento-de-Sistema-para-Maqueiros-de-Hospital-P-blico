@@ -146,24 +146,39 @@ class SistemaTransporte:
 def exibir_menu():
     print("\n--- Menu Principal ---")
     print("1. Autenticar-se")
-    print("2. Sair")
+    print("2. Listar Pacientes")
+    print("3. Listar Todas as Solicitações")
+    print("4. Sair")
+
+# Função para listar todos os pacientes cadastrados
+def listar_pacientes(sistema_transporte):
+    print("\n--- Lista de Pacientes ---")
+    for solicitacao in sistema_transporte.solicitacoes:
+        paciente = solicitacao.paciente
+        print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localização: {paciente.localizacao}, Status: {paciente.status}")
+
+# Função para listar todas as solicitações
+def listar_solicitacoes(sistema_transporte):
+    print("\n--- Lista de Solicitações ---")
+    for solicitacao in sistema_transporte.solicitacoes:
+        print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, Destino: {solicitacao.destino}, Prioridade: {solicitacao.prioridade}, Status: {solicitacao.status}")
 
 # Função para exibir o menu de maqueiro
 def menu_maqueiro(maqueiro):
     print(f"\n--- Bem-vindo, {maqueiro.nome} ---")
     print("1. Visualizar Solicitações")
-    print("2. Aceitar Solicitação")
-    print("3. Recusar Solicitação")
-    print("4. Relatar Incidente")
-    print("5. Concluir Transporte")
+    print("2. Aceitar Solicitação (Forneça o ID da solicitação)")
+    print("3. Recusar Solicitação (Forneça o ID da solicitação)")
+    print("4. Relatar Incidente (Forneça o ID da solicitação e descrição do incidente)")
+    print("5. Concluir Transporte (Forneça o ID da solicitação)")
     print("6. Visualizar Histórico")
-    print("7. Sair")
+    print("7. Voltar ao Menu Principal")
 
 # Função para exibir o menu de administrador
 def menu_admin():
     print("\n--- Bem-vindo, Administrador ---")
     print("1. Visualizar Todos os Maqueiros")
-    print("2. Sair")
+    print("2. Voltar ao Menu Principal")
 
 # Função principal que executa o CLI
 def executar_cli():
@@ -224,7 +239,7 @@ def executar_cli():
                         elif escolha_maqueiro == '7':
                             break
                         else:
-                            print("Opção inválida.")
+                            print("Opção inválida. Escolha entre 1 e 7.")
                 elif usuario_autenticado.role == "admin":
                     while True:
                         menu_admin()
@@ -237,16 +252,21 @@ def executar_cli():
                         elif escolha_admin == '2':
                             break
                         else:
-                            print("Opção inválida.")
+                            print("Opção inválida. Escolha entre 1 e 2.")
             else:
-                print("Falha na autenticação.")
+                print("Falha na autenticação. Verifique o nome de usuário e a senha.")
         elif escolha == '2':
+            listar_pacientes(sistema_transporte)
+        elif escolha == '3':
+            listar_solicitacoes(sistema_transporte)
+        elif escolha == '4':
             print("Saindo do sistema.")
             break
         else:
-            print("Opção inválida.")
+            print("Opção inválida. Escolha entre 1 e 4.")
 
 # Iniciar o sistema CLI
 if __name__ == "__main__":
     executar_cli()
+
 
