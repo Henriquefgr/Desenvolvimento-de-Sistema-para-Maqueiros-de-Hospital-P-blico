@@ -2,18 +2,22 @@ import hashlib
 import uuid
 import unittest
 
-# -------------------------------------------
 # Classes de Entidade (Paciente, SolicitacaoTransporte, Maqueiro)
-# -------------------------------------------
 
 class Paciente:
+    """
+    Representa um paciente com informações sobre seu nome, localização e status.
+    """
     def __init__(self, nome, localizacao):
-        self.id_paciente = str(uuid.uuid4())  # Gerando um ID único para o paciente
+        self.id_paciente = str(uuid.uuid4())  # Corrigido para gerar um ID único
         self.nome = nome
         self.localizacao = localizacao
         self.status = "Aguardando transporte"
 
 class SolicitacaoTransporte:
+    """
+    Representa uma solicitação de transporte de um paciente.
+    """
     def __init__(self, paciente, destino, prioridade):
         self.id_solicitacao = str(uuid.uuid4())  # Gerando um ID único para a solicitação
         self.paciente = paciente
@@ -22,27 +26,47 @@ class SolicitacaoTransporte:
         self.status = "Aguardando transporte"
 
     def atualizar_status(self, status):
+        """
+        Atualiza o status da solicitação e do paciente associado.
+        """
         self.status = status
         self.paciente.status = status
 
+    def atualizar_prioridade(self, nova_prioridade):
+        """
+        Atualiza a prioridade da solicitação.
+        """
+        self.prioridade = nova_prioridade
+
+    def atualizar_destino(self, novo_destino):
+        """
+        Atualiza o destino da solicitação.
+        """
+        self.destino = novo_destino
+
 class HistoricoSolicitacoes:
+    """
+    Classe que gerencia o histórico de solicitações realizadas.
+    """
     def __init__(self):
         self.registros = []
 
     def adicionar_registro(self, solicitacao):
-        self.registros.append({
-            "id_solicitacao": solicitacao.id_solicitacao,
-            "paciente": solicitacao.paciente.nome,
-            "destino": solicitacao.destino,
-            "prioridade": solicitacao.prioridade,
-            "status": solicitacao.status
-        })
+        """Adiciona um registro de solicitação no histórico."""
+        self.registros.append(solicitacao)
 
     def visualizar_historico(self):
-        for registro in self.registros:
-            print(f"ID: {registro['id_solicitacao']}, Paciente: {registro['paciente']}, Destino: {registro['destino']}, Status: {registro['status']}, Prioridade: {registro['prioridade']}")
+        """Exibe os registros do histórico."""
+        print("\n--- Histórico de Solicitações ---")
+        for solicitacao in self.registros:
+            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
+                  f"Destino: {solicitacao.destino}, Status: {solicitacao.status}, "
+                  f"Prioridade: {solicitacao.prioridade}")
 
 class Maqueiro:
+    """
+    Representa um maqueiro que gerencia solicitações de transporte.
+    """
     def __init__(self, nome, historico):
         self.id_maqueiro = str(uuid.uuid4())  # ID único para cada maqueiro
         self.nome = nome
@@ -50,11 +74,16 @@ class Maqueiro:
         self.historico = historico
 
     def visualizar_solicitacoes(self):
-        # Exibe as solicitações de transporte ordenadas por prioridade
+        """Exibe as solicitações atribuídas ao maqueiro, ordenadas por prioridade."""
         for solicitacao in sorted(self.solicitacoes, key=lambda x: x.prioridade):
-            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, Destino: {solicitacao.destino}, Status: {solicitacao.status}, Prioridade: {solicitacao.prioridade}")
+            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
+                  f"Destino: {solicitacao.destino}, Status: {solicitacao.status}, "
+                  f"Prioridade: {solicitacao.prioridade}")
 
     def aceitar_solicitacao(self, id_solicitacao):
+        """
+        Aceita uma solicitação de transporte.
+        """
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
                 solicitacao.atualizar_status("Em transporte")
@@ -64,6 +93,9 @@ class Maqueiro:
         print(f"Solicitação {id_solicitacao} não encontrada.")
 
     def recusar_solicitacao(self, id_solicitacao):
+        """
+        Recusa uma solicitação de transporte.
+        """
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
                 solicitacao.atualizar_status("Recusada")
@@ -91,14 +123,12 @@ class Maqueiro:
                 return
         print(f"Solicitação {id_solicitacao} não encontrada.")
 
-# -------------------------------------------
 # Sistema de Autenticação
-# -------------------------------------------
 
 class Usuario:
     def __init__(self, username, password, role):
         self.username = username
-        self.password = self.hash_password(password)  # Armazenando senha de forma segura
+        self.password = self.hash_password(password)
         self.role = role
 
     def hash_password(self, password):
@@ -123,9 +153,8 @@ class SistemaAutenticacao:
                 return usuario
         return None
 
-# -------------------------------------------
+
 # Sistema de Transporte de Pacientes
-# -------------------------------------------
 
 class SistemaTransporte:
     def __init__(self):
@@ -141,39 +170,226 @@ class SistemaTransporte:
         return solicitacao
 
 
+# Funções de CLI
 
-# Sistema de autenticação
-auth_system = SistemaAutenticacao()
-auth_system.adicionar_usuario(Usuario("maqueiro1", "senha123", "maqueiro"))
-auth_system.adicionar_usuario(Usuario("admin", "adminpass", "admin"))
+# Função para exibir o menu principal
+def exibir_menu():
+    print("\n--- Menu Principal ---")
+    print("1. Autenticar-se")
+    print("2. Listar Pacientes")
+    print("3. Listar Todas as Solicitações")
+    print("4. Sair")
 
-# Sistema de transporte
-historico = HistoricoSolicitacoes()
-maqueiro = Maqueiro("João", historico)
-sistema_transporte = SistemaTransporte()
-sistema_transporte.adicionar_maqueiro(maqueiro)
+# Função para listar todos os pacientes cadastrados
+def listar_pacientes(sistema_transporte):
+    print("\n--- Lista de Pacientes ---")
+    for solicitacao in sistema_transporte.solicitacoes:
+        paciente = solicitacao.paciente
+        print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localização: {paciente.localizacao}, Status: {paciente.status}")
 
-# Criando pacientes e solicitações
-paciente1 = Paciente("Paciente 1", "Sala 101")
-paciente2 = Paciente("Paciente 2", "Sala 102")
-solicitacao1 = sistema_transporte.criar_solicitacao(paciente1, "Raio-X", "Alta")
-solicitacao2 = sistema_transporte.criar_solicitacao(paciente2, "Tomografia", "Média")
+# Função para listar todas as solicitações
+def listar_solicitacoes(sistema_transporte):
+    print("\n--- Lista de Solicitações ---")
+    for solicitacao in sistema_transporte.solicitacoes:
+        print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, Destino: {solicitacao.destino}, Prioridade: {solicitacao.prioridade}, Status: {solicitacao.status}")
 
-# Adicionando solicitações ao maqueiro
-maqueiro.solicitacoes.append(solicitacao1)
-maqueiro.solicitacoes.append(solicitacao2)
+# Função de menu para o maqueiro
+def menu_maqueiro(maqueiro):
+    print(f"\n--- Bem-vindo, {maqueiro.nome} ---")
+    print("1. Visualizar Solicitações")
+    print("2. Aceitar Solicitação (Forneça o ID da solicitação)")
+    print("3. Recusar Solicitação (Forneça o ID da solicitação)")
+    print("4. Atualizar Solicitação (Forneça o ID e os dados a serem atualizados)")
+    print("5. Concluir Transporte (Forneça o ID da solicitação)")
+    print("6. Visualizar Histórico")
+    print("7. Voltar ao Menu Principal")
 
-# Autenticação e operação do sistema
-usuario_autenticado = auth_system.autenticar("maqueiro1", "senha123")
-if usuario_autenticado:
-    print(f"Usuário {usuario_autenticado.username} autenticado com sucesso!")
+# menu do maqueiro
+def executar_menu_maqueiro(maqueiro):
+    while True:
+        menu_maqueiro(maqueiro)
+        escolha_maqueiro = input("Escolha uma opção: ").strip()
 
-    maqueiro.visualizar_solicitacoes()
-    maqueiro.aceitar_solicitacao(solicitacao1.id_solicitacao)
-    maqueiro.recusar_solicitacao(solicitacao2.id_solicitacao)
-    maqueiro.relatar_incidente(solicitacao1.id_solicitacao, "Problema durante o transporte")
-    maqueiro.concluir_transporte(solicitacao1.id_solicitacao)
+        if escolha_maqueiro == '1':
+            maqueiro.visualizar_solicitacoes()
+        elif escolha_maqueiro == '2':
+            id_solicitacao = input("Digite o ID da solicitação para aceitar: ").strip()
+            maqueiro.aceitar_solicitacao(id_solicitacao)
+        elif escolha_maqueiro == '3':
+            id_solicitacao = input("Digite o ID da solicitação para recusar: ").strip()
+            maqueiro.recusar_solicitacao(id_solicitacao)
+        elif escolha_maqueiro == '4':
+            id_solicitacao = input("Digite o ID da solicitação para atualizar: ").strip()
+            nova_prioridade = input("Digite a nova prioridade (Alta, Média, Baixa) ou deixe em branco para não alterar: ").strip()
+            novo_destino = input("Digite o novo destino ou deixe em branco para não alterar: ").strip()
+            novo_status = input("Digite o novo status (Em transporte, Recusada, Chegou ao destino) ou deixe em branco para não alterar: ").strip()
+            maqueiro.atualizar_solicitacao(id_solicitacao, nova_prioridade, novo_destino, novo_status)
+        elif escolha_maqueiro == '5':
+            id_solicitacao = input("Digite o ID da solicitação para concluir: ").strip()
+            maqueiro.concluir_transporte(id_solicitacao)
+        elif escolha_maqueiro == '6':
+            maqueiro.historico.visualizar_historico()
+        elif escolha_maqueiro == '7':
+            break
+        else:
+            print("Opção inválida. Escolha entre 1 e 7.")
 
-    historico.visualizar_historico()
-else:
-    print("Falha na autenticação.")
+# Função para exibir o menu de administrador
+def menu_admin():
+    print("\n--- Bem-vindo, Administrador ---")
+    print("1. Visualizar Todos os Maqueiros")
+    print("2. Voltar ao Menu Principal")
+
+# Função principal que executa o CLI
+def executar_cli():
+    # Sistema de autenticação
+    auth_system = SistemaAutenticacao()
+    auth_system.adicionar_usuario(Usuario("maqueiro1", "senha123", "maqueiro"))
+    auth_system.adicionar_usuario(Usuario("admin", "adminpass", "admin"))
+    
+    # Sistema de transporte
+    historico = HistoricoSolicitacoes()
+    maqueiro = Maqueiro("João", historico)
+    sistema_transporte = SistemaTransporte()
+    sistema_transporte.adicionar_maqueiro(maqueiro)
+    
+    # Criando pacientes e solicitações
+    paciente1 = Paciente("Paciente 1", "Sala 101")
+    paciente2 = Paciente("Paciente 2", "Sala 102")
+    solicitacao1 = sistema_transporte.criar_solicitacao(paciente1, "Raio-X", "Alta")
+    solicitacao2 = sistema_transporte.criar_solicitacao(paciente2, "Tomografia", "Média")
+    
+    maqueiro.solicitacoes.append(solicitacao1)
+    maqueiro.solicitacoes.append(solicitacao2)
+    
+    # Loop principal da CLI
+    while True:
+        exibir_menu()
+        escolha = input("Escolha uma opção: ").strip()
+        
+        if escolha == '1':
+            # Autenticação
+            username = input("Digite o nome de usuário: ").strip()
+            password = input("Digite a senha: ").strip()
+            
+            usuario_autenticado = auth_system.autenticar(username, password)
+            if usuario_autenticado:
+                if usuario_autenticado.role == "maqueiro":
+                    while True:
+                        menu_maqueiro(maqueiro)
+                        escolha_maqueiro = input("Escolha uma opção: ").strip()
+                        
+                        if escolha_maqueiro == '1':
+                            maqueiro.visualizar_solicitacoes()
+                        elif escolha_maqueiro == '2':
+                            id_solicitacao = input("Digite o ID da solicitação para aceitar: ").strip()
+                            maqueiro.aceitar_solicitacao(id_solicitacao)
+                        elif escolha_maqueiro == '3':
+                            id_solicitacao = input("Digite o ID da solicitação para recusar: ").strip()
+                            maqueiro.recusar_solicitacao(id_solicitacao)
+                        elif escolha_maqueiro == '4':
+                            id_solicitacao = input("Digite o ID da solicitação para relatar incidente: ").strip()
+                            descricao = input("Digite a descrição do incidente: ").strip()
+                            maqueiro.relatar_incidente(id_solicitacao, descricao)
+                        elif escolha_maqueiro == '5':
+                            id_solicitacao = input("Digite o ID da solicitação para concluir: ").strip()
+                            maqueiro.concluir_transporte(id_solicitacao)
+                        elif escolha_maqueiro == '6':
+                            historico.visualizar_historico()
+                        elif escolha_maqueiro == '7':
+                            break
+                        else:
+                            print("Opção inválida. Escolha entre 1 e 7.")
+                elif usuario_autenticado.role == "admin":
+                    while True:
+                        menu_admin()
+                        escolha_admin = input("Escolha uma opção: ").strip()
+                        
+                        if escolha_admin == '1':
+                            print("\nLista de Maqueiros:")
+                            for maqueiro in sistema_transporte.maqueiros:
+                                print(f"ID: {maqueiro.id_maqueiro}, Nome: {maqueiro.nome}")
+                        elif escolha_admin == '2':
+                            break
+                        else:
+                            print("Opção inválida. Escolha entre 1 e 2.")
+            else:
+                print("Falha na autenticação. Verifique o nome de usuário e a senha.")
+        elif escolha == '2':
+            listar_pacientes(sistema_transporte)
+        elif escolha == '3':
+            listar_solicitacoes(sistema_transporte)
+        elif escolha == '4':
+            print("Saindo do sistema.")
+            break
+        else:
+            print("Opção inválida. Escolha entre 1 e 4.")
+
+# Iniciar o sistema CLI
+if __name__ == "__main__":
+    executar_cli()
+
+# Implementação de testes automatizados
+
+class TestSistemaTransporte(unittest.TestCase):
+
+    def setUp(self):
+        # Inicializando o sistema para testes
+        self.auth_system = SistemaAutenticacao()
+        self.auth_system.adicionar_usuario(Usuario("maqueiro1", "senha123", "maqueiro"))
+        self.auth_system.adicionar_usuario(Usuario("admin", "adminpass", "admin"))
+
+        self.sistema = SistemaTransporte()
+        self.historico = HistoricoSolicitacoes()
+
+        self.paciente1 = Paciente(1, "Paciente 1", "Sala 101")
+        self.paciente2 = Paciente(2, "Paciente 2", "Sala 102")
+        
+        self.maqueiro = Maqueiro(1, "João", self.historico)
+        self.sistema.adicionar_maqueiro(self.maqueiro)
+
+    def test_criar_solicitacao(self):
+        solicitacao = self.sistema.criar_solicitacao(self.paciente1, "Raio-X", "Alta")
+        self.assertEqual(solicitacao.paciente, self.paciente1)
+        self.assertEqual(solicitacao.destino, "Raio-X")
+        self.assertEqual(solicitacao.prioridade, "Alta")
+        self.assertEqual(solicitacao.status, "Aguardando transporte")
+
+    def test_aceitar_solicitacao(self):
+        solicitacao = self.sistema.criar_solicitacao(self.paciente1, "Raio-X", "Alta")
+        self.maqueiro.aceitar_solicitacao(solicitacao.id_solicitacao)
+        self.assertEqual(solicitacao.status, "Em transporte")
+        self.assertEqual(self.paciente1.status, "Em transporte")
+
+    def test_recusar_solicitacao(self):
+        solicitacao = self.sistema.criar_solicitacao(self.paciente2, "Tomografia", "Média")
+        self.maqueiro.recusar_solicitacao(solicitacao.id_solicitacao)
+        self.assertEqual(solicitacao.status, "Recusada")
+        self.assertEqual(self.paciente2.status, "Aguardando transporte")
+
+    def test_concluir_transporte(self):
+        solicitacao = self.sistema.criar_solicitacao(self.paciente1, "Raio-X", "Alta")
+        self.maqueiro.aceitar_solicitacao(solicitacao.id_solicitacao)
+        self.maqueiro.concluir_transporte(solicitacao.id_solicitacao)
+        self.assertEqual(solicitacao.status, "Chegou ao destino")
+        self.assertEqual(self.paciente1.status, "Chegou ao destino")
+
+    def test_relatar_incidente(self):
+        solicitacao = self.sistema.criar_solicitacao(self.paciente1, "Raio-X", "Alta")
+        self.maqueiro.aceitar_solicitacao(solicitacao.id_solicitacao)
+
+class TestSistemaTransporte(unittest.TestCase):
+    def setUp(self):
+        self.historico = HistoricoSolicitacoes()
+        self.maqueiro = Maqueiro("João", self.historico)
+        self.sistema = SistemaTransporte()
+        self.sistema.adicionar_maqueiro(self.maqueiro)
+
+    def test_criar_solicitacao(self):
+        paciente = Paciente("Paciente 1", "Sala 101")
+        solicitacao = self.sistema.criar_solicitacao(paciente, "Raio-X", "Alta")
+        self.assertEqual(solicitacao.paciente.nome, "Paciente 1")
+        self.assertEqual(solicitacao.destino, "Raio-X")
+
+if __name__ == "__main__":
+    unittest.main()
