@@ -6,13 +6,31 @@ import uuid
 # -------------------------------------------
 
 class Paciente:
+    """
+    Representa um paciente no sistema.
+
+    Atributos:
+        nome (str): Nome do paciente.
+        localizacao (str): Localização atual do paciente.
+        status (str): Status atual do transporte do paciente.
+    """
     def __init__(self, nome, localizacao):
         self.id_paciente = str(uuid.uuid4())  # Gerando um ID único para o paciente
         self.nome = nome
         self.localizacao = localizacao
         self.status = "Aguardando transporte"
 
+
 class SolicitacaoTransporte:
+    """
+    Representa uma solicitação de transporte de um paciente.
+
+    Atributos:
+        paciente (Paciente): Paciente associado à solicitação.
+        destino (str): Destino do transporte.
+        prioridade (str): Prioridade da solicitação (e.g., 'Alta', 'Média', 'Baixa').
+        status (str): Status atual da solicitação.
+    """
     def __init__(self, paciente, destino, prioridade):
         self.id_solicitacao = str(uuid.uuid4())  # Gerando um ID único para a solicitação
         self.paciente = paciente
@@ -21,14 +39,33 @@ class SolicitacaoTransporte:
         self.status = "Aguardando transporte"
 
     def atualizar_status(self, status):
+        """
+        Atualiza o status da solicitação e do paciente associado.
+
+        Args:
+            status (str): Novo status da solicitação.
+        """
         self.status = status
         self.paciente.status = status
 
+
 class HistoricoSolicitacoes:
+    """
+    Gerencia o histórico de solicitações realizadas no sistema.
+
+    Atributos:
+        registros (list): Lista de registros de solicitações.
+    """
     def __init__(self):
         self.registros = []
 
     def adicionar_registro(self, solicitacao):
+        """
+        Adiciona uma solicitação ao histórico.
+
+        Args:
+            solicitacao (SolicitacaoTransporte): Solicitação a ser adicionada.
+        """
         self.registros.append({
             "id_solicitacao": solicitacao.id_solicitacao,
             "paciente": solicitacao.paciente.nome,
@@ -38,10 +75,22 @@ class HistoricoSolicitacoes:
         })
 
     def visualizar_historico(self):
+        """Exibe o histórico de solicitações no console."""
         for registro in self.registros:
-            print(f"ID: {registro['id_solicitacao']}, Paciente: {registro['paciente']}, Destino: {registro['destino']}, Status: {registro['status']}, Prioridade: {registro['prioridade']}")
+            print(f"ID: {registro['id_solicitacao']}, Paciente: {registro['paciente']}, "
+                  f"Destino: {registro['destino']}, Status: {registro['status']}, "
+                  f"Prioridade: {registro['prioridade']}")
+
 
 class Maqueiro:
+    """
+    Representa um maqueiro que gerencia solicitações de transporte.
+
+    Atributos:
+        nome (str): Nome do maqueiro.
+        solicitacoes (list): Lista de solicitações atribuídas ao maqueiro.
+        historico (HistoricoSolicitacoes): Referência ao histórico do sistema.
+    """
     def __init__(self, nome, historico):
         self.id_maqueiro = str(uuid.uuid4())  # ID único para cada maqueiro
         self.nome = nome
@@ -49,10 +98,39 @@ class Maqueiro:
         self.historico = historico
 
     def visualizar_solicitacoes(self):
+        """Exibe as solicitações atribuídas ao maqueiro, ordenadas por prioridade."""
         for solicitacao in sorted(self.solicitacoes, key=lambda x: x.prioridade):
-            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, Destino: {solicitacao.destino}, Status: {solicitacao.status}, Prioridade: {solicitacao.prioridade}")
+            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
+                  f"Destino: {solicitacao.destino}, Status: {solicitacao.status}, "
+                  f"Prioridade: {solicitacao.prioridade}")
+
+    def validar_id(self, id_solicitacao):
+        """
+        Valida se o ID da solicitação fornecido está no formato UUID.
+
+        Args:
+            id_solicitacao (str): ID da solicitação para validação.
+
+        Returns:
+            bool: True se for um UUID válido, False caso contrário.
+        """
+        try:
+            uuid.UUID(id_solicitacao)
+            return True
+        except ValueError:
+            return False
 
     def aceitar_solicitacao(self, id_solicitacao):
+        """
+        Aceita uma solicitação de transporte.
+
+        Args:
+            id_solicitacao (str): ID da solicitação a ser aceita.
+        """
+        if not self.validar_id(id_solicitacao):
+            print("ID inválido. Por favor, insira um ID válido.")
+            return
+
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
                 solicitacao.atualizar_status("Em transporte")
@@ -62,6 +140,16 @@ class Maqueiro:
         print(f"Solicitação {id_solicitacao} não encontrada.")
 
     def recusar_solicitacao(self, id_solicitacao):
+        """
+        Recusa uma solicitação de transporte.
+
+        Args:
+            id_solicitacao (str): ID da solicitação a ser recusada.
+        """
+        if not self.validar_id(id_solicitacao):
+            print("ID inválido. Por favor, insira um ID válido.")
+            return
+
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
                 solicitacao.atualizar_status("Recusada")
@@ -70,6 +158,9 @@ class Maqueiro:
                 self.solicitacoes.remove(solicitacao)
                 return
         print(f"Solicitação {id_solicitacao} não encontrada.")
+
+# Adicionei o método `validar_id` para validar entradas de ID no formato UUID em todas as funções relevantes.
+
 
     def relatar_incidente(self, id_solicitacao, descricao):
         for solicitacao in self.solicitacoes:
