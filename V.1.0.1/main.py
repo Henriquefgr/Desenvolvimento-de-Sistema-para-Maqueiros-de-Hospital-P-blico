@@ -9,7 +9,7 @@ class Paciente:
     Representa um paciente com informações sobre seu nome, localização e status.
     """
     def __init__(self, nome, localizacao):
-        self.id_paciente = str(uuid.uuid4())  # Corrigido para gerar um ID único
+        self.id_paciente = str(uuid.uuid4()) 
         self.nome = nome
         self.localizacao = localizacao
         self.status = "Aguardando transporte"
@@ -19,7 +19,7 @@ class SolicitacaoTransporte:
     Representa uma solicitação de transporte de um paciente.
     """
     def __init__(self, paciente, destino, prioridade):
-        self.id_solicitacao = str(uuid.uuid4())  # Gerando um ID único para a solicitação
+        self.id_solicitacao = str(uuid.uuid4())  
         self.paciente = paciente
         self.destino = destino
         self.prioridade = prioridade
@@ -68,7 +68,7 @@ class Maqueiro:
     Representa um maqueiro que gerencia solicitações de transporte.
     """
     def __init__(self, nome, historico):
-        self.id_maqueiro = str(uuid.uuid4())  # ID único para cada maqueiro
+        self.id_maqueiro = str(uuid.uuid4())  
         self.nome = nome
         self.solicitacoes = []
         self.historico = historico
