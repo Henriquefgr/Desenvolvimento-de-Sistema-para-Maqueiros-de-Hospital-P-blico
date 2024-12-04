@@ -1,0 +1,43 @@
+Objetivo do Teste
+O objetivo deste teste é verificar o correto funcionamento do sistema de transporte de pacientes, que envolve a criação de solicitações, aceitação e recusa de solicitações por maqueiros, atualização de status de transporte, bem como a funcionalidade de relatórios de incidentes e conclusão de transporte.
+
+ Metodologia
+Testes Manuais: A maior parte dos testes foi realizada manualmente através de interações com a interface de linha de comando (CLI).
+Testes Automatizados: O código também inclui testes automatizados utilizando o framework unittest para garantir que as funcionalidades-chave estejam funcionando corretamente.
+Os testes foram realizados com os seguintes componentes:
+
+Solicitações de Transporte: Criação, atualização e verificação de status.
+Maqueiros: Atribuição de solicitações e alteração de status.
+Histórico: Verificação da inclusão de registros no histórico de solicitações.
+
+Teste feitos
+Teste 1: Criar Solicitação
+Entrada: Um paciente e um destino com prioridade.
+Resultado Esperado: A solicitação deve ser criada corretamente com os dados do paciente, destino e prioridade.
+Resultado Obtido: Teste passou corretamente.
+
+Teste 2: Aceitar Solicitação
+Entrada: Solicitação criada anteriormente, com ID conhecido.
+Resultado Esperado: A solicitação deve ter seu status alterado para "Em transporte", e o status do paciente também deve ser alterado.
+Resultado Obtido: Teste passou corretamente, o status foi atualizado como esperado.
+Teste 3: Recusar Solicitação
+Entrada: Solicitação criada com ID conhecido.
+Resultado Esperado: A solicitação deve ser recusada, com o status da solicitação sendo "Recusada" e o paciente mantido em "Aguardando transporte".
+Resultado Obtido: Teste passou corretamente.
+Teste 4: Concluir Transporte
+Entrada: Solicitação em transporte.
+Resultado Esperado: O status da solicitação e do paciente deve ser alterado para "Chegou ao destino".
+Resultado Obtido: Teste passou corretamente, conforme esperado.
+Teste 5: Relatar Incidente
+Entrada: Solicitação em transporte.
+Resultado Esperado: O status da solicitação deve ser alterado para "Incidente relatado", e a descrição do incidente deve ser registrada.
+Resultado Obtido: Teste passou corretamente.
+
+Resultados dos Testes Automatizados
+Testes Criar Solicitação: As solicitações foram criadas corretamente, com os dados de paciente, destino e prioridade corretamente associados.
+Testes Aceitar Solicitação: A aceitação de solicitações funcionou conforme esperado, com o status da solicitação e do paciente sendo atualizados para "Em transporte".
+Testes Recusar Solicitação: Solicitações foram recusadas corretamente, com status atualizado para "Recusada".
+Testes Concluir Transporte: O transporte foi concluído corretamente, com status alterado para "Chegou ao destino".
+Testes Relatar Incidente: A funcionalidade de relato de incidente foi implementada corretamente, alterando o status para "Incidente relatado".
+5. Análise dos Resultados
+Todos os testes automatizados passaram sem erros. As funcionalidades de solicitação, aceitação, recusa, conclusão e relato de incidentes estão funcionando corretamente. Não foram identificados problemas no código durante a execução dos testes.
