@@ -1,0 +1,128 @@
+Manual de Usuário - Sistema de Transporte de Pacientes
+Descrição Geral
+O sistema gerencia o transporte de pacientes dentro de um ambiente hospitalar. Ele permite que administradores e maqueiros realizem diversas operações, como autenticação, gerenciamento de solicitações de transporte, e registro de incidentes.
+
+Principais Funcionalidades
+1. Autenticação
+O sistema suporta autenticação baseada em usuários cadastrados previamente, permitindo diferentes permissões dependendo da função:
+
+Admin: Visualiza maqueiros e gerencia o sistema.
+Maqueiro: Aceita, recusa e conclui solicitações de transporte e registra incidentes.
+2. Gerenciamento de Pacientes e Solicitações
+O sistema armazena informações de pacientes, gerencia solicitações de transporte e permite visualizar histórico de eventos relacionados.
+
+3. Registro e Visualização de Incidentes
+Maqueiros podem registrar incidentes que ocorram durante o transporte e visualizar os detalhes.
+
+4. Histórico de Solicitações
+As ações realizadas sobre as solicitações (aceitar, recusar, concluir, incidentes) são registradas para consulta posterior.
+
+Instruções de Uso
+Passo 1: Iniciar o Sistema
+Execute o código Python em um ambiente compatível. O menu principal será exibido.
+
+Passo 2: Navegar pelo Menu Principal
+Opção 1: Autenticar-se
+Insira seu nome de usuário e senha para acessar o sistema.
+
+Caso seja maqueiro, será direcionado ao menu de maqueiros.
+Caso seja administrador, será direcionado ao menu de administradores.
+Opção 2: Listar Pacientes
+Exibe uma lista de todos os pacientes cadastrados no sistema, incluindo:
+
+ID do Paciente
+Nome
+Localização
+Status (ex.: aguardando transporte, em transporte)
+Opção 3: Listar Todas as Solicitações
+Exibe uma lista com informações detalhadas de todas as solicitações de transporte no sistema.
+
+Opção 4: Sair
+Finaliza o programa.
+
+Funcionalidades do Maqueiro
+Após autenticação, o maqueiro terá acesso às seguintes opções:
+
+Visualizar Solicitações Lista todas as solicitações de transporte atribuídas ao maqueiro, ordenadas por prioridade.
+
+Aceitar Solicitação Permite aceitar uma solicitação informando o ID.
+O status da solicitação será atualizado para "Em transporte".
+
+Recusar Solicitação Permite recusar uma solicitação informando o ID.
+O status será atualizado para "Recusada".
+
+Relatar Incidente Permite registrar um incidente relacionado a uma solicitação. Informações necessárias:
+
+ID da solicitação
+Descrição do incidente
+O status será atualizado para "Incidente relatado".
+Concluir Transporte Finaliza a solicitação, alterando o status para "Chegou ao destino".
+
+Visualizar Histórico Exibe um histórico detalhado de todas as solicitações e incidentes associados.
+
+Voltar ao Menu Principal Retorna ao menu inicial.
+
+Funcionalidades do Administrador
+Após autenticação, o administrador terá acesso às seguintes opções:
+
+Visualizar Todos os Maqueiros Lista os maqueiros cadastrados no sistema, com informações como:
+
+ID do Maqueiro
+Nome
+Voltar ao Menu Principal Retorna ao menu inicial.
+
+Gerenciamento de Pacientes e Solicitações
+Cadastrar Paciente
+Pacientes são adicionados ao sistema no código ou por administradores.
+
+Criar Solicitação
+O sistema gera automaticamente solicitações associadas aos pacientes.
+As solicitações incluem:
+Paciente
+Destino (ex.: Raio-X, Tomografia)
+Prioridade (Alta, Média, Baixa)
+Estrutura de Dados
+Pacientes
+Cada paciente possui:
+
+ID único
+Nome
+Localização
+Status (ex.: aguardando transporte)
+Solicitações de Transporte
+Cada solicitação possui:
+
+ID único
+Paciente associado
+Destino
+Prioridade
+Status atual
+Registro de incidentes (se houver)
+Maqueiros
+Cada maqueiro gerencia um conjunto de solicitações e possui um histórico detalhado.
+
+Histórico
+O histórico armazena:
+
+Solicitações processadas
+Incidentes relatados, incluindo descrição e maqueiro responsável.
+Fluxo de Operações
+Administrador
+
+Visualiza maqueiros.
+Gera pacientes e solicitações no início.
+Maqueiro
+
+Gerencia as solicitações atribuídas.
+Registra incidentes durante o transporte.
+Consulta histórico de ações.
+Erros Comuns e Soluções
+"Falha na autenticação"
+
+Verifique se o nome de usuário e a senha estão corretos.
+"Solicitação não encontrada"
+
+Certifique-se de digitar o ID correto.
+"Usuário já cadastrado"
+
+Tente usar um nome de usuário único ao adicionar usuários.

@@ -1,80 +1,136 @@
 import hashlib
 import uuid
+import datetime
 import unittest
+
+# Classes de Autenticação
+
+class Usuario:
+    """
+    Representa um usuário com autenticação.
+    """
+    def __init__(self, username, password, role):
+        self.username = username
+        # A senha é armazenada como um hash para maior segurança
+        self.password_hash = hashlib.sha256(password.encode()).hexdigest()
+        self.role = role  # Role pode ser "maqueiro" ou "admin"
+
+    def verificar_senha(self, password):
+        """
+        Verifica se a senha fornecida corresponde ao hash armazenado.
+        """
+        return hashlib.sha256(password.encode()).hexdigest() == self.password_hash
+
+
+class SistemaAutenticacao:
+    """
+    Gerencia a autenticação de usuários.
+    """
+    def __init__(self):
+        self.usuarios = {}
+
+    def adicionar_usuario(self, usuario):
+        """
+        Adiciona um usuário ao sistema de autenticação.
+        """
+        if usuario.username in self.usuarios:
+            raise ValueError("Usuario já cadastrado.")
+        self.usuarios[usuario.username] = usuario
+
+    def autenticar(self, username, password):
+        """
+        Autentica um usuario com base no username e senha fornecidos.
+        """
+        usuario = self.usuarios.get(username)
+        if usuario and usuario.verificar_senha(password):
+            return usuario
+        return None
+
 
 # Classes de Entidade (Paciente, SolicitacaoTransporte, Maqueiro)
 
 class Paciente:
     """
-    Representa um paciente com informações sobre seu nome, localização e status.
+    Representa um paciente com informacoes sobre seu nome, localizacao e status.
     """
     def __init__(self, nome, localizacao):
-        self.id_paciente = str(uuid.uuid4()) 
+        self.id_paciente = str(uuid.uuid4())
         self.nome = nome
         self.localizacao = localizacao
         self.status = "Aguardando transporte"
 
+
 class SolicitacaoTransporte:
     """
-    Representa uma solicitação de transporte de um paciente.
+    Representa uma solicitacao de transporte de um paciente.
     """
     def __init__(self, paciente, destino, prioridade):
-        self.id_solicitacao = str(uuid.uuid4())  
+        self.id_solicitacao = str(uuid.uuid4())
         self.paciente = paciente
         self.destino = destino
         self.prioridade = prioridade
         self.status = "Aguardando transporte"
+        self.incidentes = []
 
     def atualizar_status(self, status):
         """
-        Atualiza o status da solicitação e do paciente associado.
+        Atualiza o status da solicitacao e do paciente associado.
         """
         self.status = status
         self.paciente.status = status
 
-    def atualizar_prioridade(self, nova_prioridade):
+    def registrar_incidente(self, descricao, maqueiro_responsavel):
         """
-        Atualiza a prioridade da solicitação.
+        Registra um incidente associado a solicitacao.
         """
-        self.prioridade = nova_prioridade
+        data_hora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        incidente = {
+            "data_hora": data_hora,
+            "descricao": descricao,
+            "maqueiro_responsavel": maqueiro_responsavel.nome
+        }
+        self.incidentes.append(incidente)
 
-    def atualizar_destino(self, novo_destino):
-        """
-        Atualiza o destino da solicitação.
-        """
-        self.destino = novo_destino
+
+# Outras classes e funcionalidades seguem inalteradas...
 
 class HistoricoSolicitacoes:
     """
-    Classe que gerencia o histórico de solicitações realizadas.
+    Classe que gerencia o historico de solicitacoes realizadas.
     """
     def __init__(self):
         self.registros = []
 
     def adicionar_registro(self, solicitacao):
-        """Adiciona um registro de solicitação no histórico."""
+        """Adiciona um registro de solicitacao no historico."""
         self.registros.append(solicitacao)
 
     def visualizar_historico(self):
-        """Exibe os registros do histórico."""
-        print("\n--- Histórico de Solicitações ---")
+        """Exibe os registros do historico, incluindo detalhes de incidentes."""
+        print("\n--- Histórico de Solicitacoes ---")
         for solicitacao in self.registros:
             print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
                   f"Destino: {solicitacao.destino}, Status: {solicitacao.status}, "
                   f"Prioridade: {solicitacao.prioridade}")
+            if solicitacao.incidentes:
+                print("  -> Incidentes:")
+                for incidente in solicitacao.incidentes:
+                    print(f"     - {incidente['data_hora']}: {incidente['descricao']} (Maqueiro: {incidente['maqueiro_responsavel']})")
+
 
 class Maqueiro:
     """
-    Representa um maqueiro que gerencia solicitações de transporte.
+    Representa um maqueiro que gerencia solicitacoes de transporte.
     """
     def __init__(self, nome, historico):
-        self.id_maqueiro = str(uuid.uuid4())  
+        self.id_maqueiro = str(uuid.uuid4())
         self.nome = nome
         self.solicitacoes = []
         self.historico = historico
 
     def visualizar_solicitacoes(self):
-        """Exibe as solicitações atribuídas ao maqueiro, ordenadas por prioridade."""
+        """Exibe as solicitacoes atribuidas ao maqueiro, ordenadas por prioridade."""
+        print("\n--- Solicitacoes do Maqueiro ---")
         for solicitacao in sorted(self.solicitacoes, key=lambda x: x.prioridade):
             print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
                   f"Destino: {solicitacao.destino}, Status: {solicitacao.status}, "
@@ -82,7 +138,7 @@ class Maqueiro:
 
     def aceitar_solicitacao(self, id_solicitacao):
         """
-        Aceita uma solicitação de transporte.
+        Aceita uma solicitacao de transporte.
         """
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
@@ -90,68 +146,46 @@ class Maqueiro:
                 print(f"Solicitação {id_solicitacao} aceita por {self.nome}.")
                 self.historico.adicionar_registro(solicitacao)
                 return
-        print(f"Solicitação {id_solicitacao} não encontrada.")
+        print(f"Solicitacao {id_solicitacao} nao encontrada.")
+
 
     def recusar_solicitacao(self, id_solicitacao):
         """
-        Recusa uma solicitação de transporte.
+        Recusa uma solicitacao de transporte.
         """
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
                 solicitacao.atualizar_status("Recusada")
-                print(f"Solicitação {id_solicitacao} recusada por {self.nome}.")
-                self.historico.adicionar_registro(solicitacao)
-                self.solicitacoes.remove(solicitacao)
-                return
-        print(f"Solicitação {id_solicitacao} não encontrada.")
-
-    def relatar_incidente(self, id_solicitacao, descricao):
-        for solicitacao in self.solicitacoes:
-            if solicitacao.id_solicitacao == id_solicitacao:
-                solicitacao.atualizar_status("Incidente relatado")
-                print(f"Incidente relatado na solicitação {id_solicitacao}: {descricao}.")
+                print(f"Solicitacao {id_solicitacao} recusada por {self.nome}.")
                 self.historico.adicionar_registro(solicitacao)
                 return
-        print(f"Solicitação {id_solicitacao} não encontrada.")
+        print(f"Solicitação {id_solicitacao} nao encontrada.")
 
     def concluir_transporte(self, id_solicitacao):
+        """
+        Conclui o transporte e atualiza o status.
+        """
         for solicitacao in self.solicitacoes:
             if solicitacao.id_solicitacao == id_solicitacao:
                 solicitacao.atualizar_status("Chegou ao destino")
-                print(f"Solicitação {id_solicitacao} concluída por {self.nome}.")
+                print(f"Solicitacao {id_solicitacao} concluída por {self.nome}.")
                 self.historico.adicionar_registro(solicitacao)
                 return
-        print(f"Solicitação {id_solicitacao} não encontrada.")
+        print(f"Solicitação {id_solicitacao} nao encontrada.")
 
-# Sistema de Autenticação
+    def relatar_incidente(self, id_solicitacao, descricao):
+        """
+        Relata um incidente associado a uma solicitacao.
+        """
+        for solicitacao in self.solicitacoes:
+            if solicitacao.id_solicitacao == id_solicitacao:
+                solicitacao.registrar_incidente(descricao, self)
+                solicitacao.atualizar_status("Incidente relatado")
+                print(f"Incidente relatado na solicitacao {id_solicitacao}: {descricao}.")
+                self.historico.adicionar_registro(solicitacao)
+                return
+        print(f"Solicitacao {id_solicitacao} nao encontrada.")
 
-class Usuario:
-    def __init__(self, username, password, role):
-        self.username = username
-        self.password = self.hash_password(password)
-        self.role = role
-
-    def hash_password(self, password):
-        """Gera o hash da senha usando SHA-256"""
-        return hashlib.sha256(password.encode()).hexdigest()
-
-    def check_password(self, password):
-        """Verifica se a senha fornecida corresponde ao hash armazenado"""
-        return self.password == self.hash_password(password)
-
-class SistemaAutenticacao:
-    def __init__(self):
-        self.usuarios = []
-
-    def adicionar_usuario(self, usuario):
-        self.usuarios.append(usuario)
-
-    def autenticar(self, username, password):
-        """Autentica o usuário com base no nome de usuário e senha"""
-        for usuario in self.usuarios:
-            if usuario.username == username and usuario.check_password(password):
-                return usuario
-        return None
 
 
 # Sistema de Transporte de Pacientes
@@ -167,6 +201,7 @@ class SistemaTransporte:
     def criar_solicitacao(self, paciente, destino, prioridade):
         solicitacao = SolicitacaoTransporte(paciente, destino, prioridade)
         self.solicitacoes.append(solicitacao)
+        self.solicitacoes.sort(key=lambda x: x.prioridade)  # Ordena globalmente por prioridade
         return solicitacao
 
 
@@ -177,7 +212,7 @@ def exibir_menu():
     print("\n--- Menu Principal ---")
     print("1. Autenticar-se")
     print("2. Listar Pacientes")
-    print("3. Listar Todas as Solicitações")
+    print("3. Listar Todas as Solicitacoes")
     print("4. Sair")
 
 # Função para listar todos os pacientes cadastrados
@@ -185,23 +220,23 @@ def listar_pacientes(sistema_transporte):
     print("\n--- Lista de Pacientes ---")
     for solicitacao in sistema_transporte.solicitacoes:
         paciente = solicitacao.paciente
-        print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localização: {paciente.localizacao}, Status: {paciente.status}")
+        print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localizacao: {paciente.localizacao}, Status: {paciente.status}")
 
 # Função para listar todas as solicitações
 def listar_solicitacoes(sistema_transporte):
-    print("\n--- Lista de Solicitações ---")
+    print("\n--- Lista de Solicitacoes ---")
     for solicitacao in sistema_transporte.solicitacoes:
         print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, Destino: {solicitacao.destino}, Prioridade: {solicitacao.prioridade}, Status: {solicitacao.status}")
 
 # Função de menu para o maqueiro
 def menu_maqueiro(maqueiro):
     print(f"\n--- Bem-vindo, {maqueiro.nome} ---")
-    print("1. Visualizar Solicitações")
-    print("2. Aceitar Solicitação (Forneça o ID da solicitação)")
-    print("3. Recusar Solicitação (Forneça o ID da solicitação)")
-    print("4. Atualizar Solicitação (Forneça o ID e os dados a serem atualizados)")
-    print("5. Concluir Transporte (Forneça o ID da solicitação)")
-    print("6. Visualizar Histórico")
+    print("1. Visualizar Solicitacoes")
+    print("2. Aceitar Solicitacao (Forneça o ID da solicitacao)")
+    print("3. Recusar Solicitacao (Forneça o ID da solicitacao)")
+    print("4. Atualizar Solicitacao (Forneça o ID e os dados a serem atualizados)")
+    print("5. Concluir Transporte (Forneça o ID da solicitacao)")
+    print("6. Visualizar Historico")
     print("7. Voltar ao Menu Principal")
 
 # menu do maqueiro
@@ -213,19 +248,19 @@ def executar_menu_maqueiro(maqueiro):
         if escolha_maqueiro == '1':
             maqueiro.visualizar_solicitacoes()
         elif escolha_maqueiro == '2':
-            id_solicitacao = input("Digite o ID da solicitação para aceitar: ").strip()
+            id_solicitacao = input("Digite o ID da solicitacao para aceitar: ").strip()
             maqueiro.aceitar_solicitacao(id_solicitacao)
         elif escolha_maqueiro == '3':
-            id_solicitacao = input("Digite o ID da solicitação para recusar: ").strip()
+            id_solicitacao = input("Digite o ID da solicitacao para recusar: ").strip()
             maqueiro.recusar_solicitacao(id_solicitacao)
         elif escolha_maqueiro == '4':
-            id_solicitacao = input("Digite o ID da solicitação para atualizar: ").strip()
-            nova_prioridade = input("Digite a nova prioridade (Alta, Média, Baixa) ou deixe em branco para não alterar: ").strip()
-            novo_destino = input("Digite o novo destino ou deixe em branco para não alterar: ").strip()
-            novo_status = input("Digite o novo status (Em transporte, Recusada, Chegou ao destino) ou deixe em branco para não alterar: ").strip()
+            id_solicitacao = input("Digite o ID da solicitacao para atualizar: ").strip()
+            nova_prioridade = input("Digite a nova prioridade (Alta, Média, Baixa) ou deixe em branco para nao alterar: ").strip()
+            novo_destino = input("Digite o novo destino ou deixe em branco para nao alterar: ").strip()
+            novo_status = input("Digite o novo status (Em transporte, Recusada, Chegou ao destino) ou deixe em branco para nao alterar: ").strip()
             maqueiro.atualizar_solicitacao(id_solicitacao, nova_prioridade, novo_destino, novo_status)
         elif escolha_maqueiro == '5':
-            id_solicitacao = input("Digite o ID da solicitação para concluir: ").strip()
+            id_solicitacao = input("Digite o ID da solicitacao para concluir: ").strip()
             maqueiro.concluir_transporte(id_solicitacao)
         elif escolha_maqueiro == '6':
             maqueiro.historico.visualizar_historico()
@@ -378,7 +413,6 @@ class TestSistemaTransporte(unittest.TestCase):
         solicitacao = self.sistema.criar_solicitacao(self.paciente1, "Raio-X", "Alta")
         self.maqueiro.aceitar_solicitacao(solicitacao.id_solicitacao)
 
-class TestSistemaTransporte(unittest.TestCase):
     def setUp(self):
         self.historico = HistoricoSolicitacoes()
         self.maqueiro = Maqueiro("João", self.historico)
