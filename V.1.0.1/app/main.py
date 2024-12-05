@@ -92,7 +92,6 @@ class SolicitacaoTransporte:
         self.incidentes.append(incidente)
 
 
-# Outras classes e funcionalidades seguem inalteradas...
 
 class HistoricoSolicitacoes:
     """
@@ -117,6 +116,14 @@ class HistoricoSolicitacoes:
                 for incidente in solicitacao.incidentes:
                     print(f"     - {incidente['data_hora']}: {incidente['descricao']} (Maqueiro: {incidente['maqueiro_responsavel']})")
 
+class IDNaoEncontradoError(Exception):
+    """Exceção lançada quando um ID não é encontrado no sistema."""
+    pass
+
+class OperacaoInvalidaError(Exception):
+    """Exceção lançada quando uma operação inválida é tentada."""
+    pass
+
 
 class Maqueiro:
     """
@@ -137,54 +144,42 @@ class Maqueiro:
                   f"Prioridade: {solicitacao.prioridade}")
 
     def aceitar_solicitacao(self, id_solicitacao):
-        """
-        Aceita uma solicitacao de transporte.
-        """
-        for solicitacao in self.solicitacoes:
-            if solicitacao.id_solicitacao == id_solicitacao:
-                solicitacao.atualizar_status("Em transporte")
-                print(f"Solicitação {id_solicitacao} aceita por {self.nome}.")
-                self.historico.adicionar_registro(solicitacao)
-                return
-        print(f"Solicitacao {id_solicitacao} nao encontrada.")
+        try:
+            solicitacao = next(s for s in self.solicitacoes if s.id_solicitacao == id_solicitacao)
+            solicitacao.atualizar_status("Em transporte")
+            print(f"Solicitação {id_solicitacao} aceita por {self.nome}.")
+            self.historico.adicionar_registro(solicitacao)
+        except StopIteration:
+            raise IDNaoEncontradoError(f"Solicitação com ID {id_solicitacao} não encontrada.")
 
 
     def recusar_solicitacao(self, id_solicitacao):
-        """
-        Recusa uma solicitacao de transporte.
-        """
-        for solicitacao in self.solicitacoes:
-            if solicitacao.id_solicitacao == id_solicitacao:
-                solicitacao.atualizar_status("Recusada")
-                print(f"Solicitacao {id_solicitacao} recusada por {self.nome}.")
-                self.historico.adicionar_registro(solicitacao)
-                return
-        print(f"Solicitação {id_solicitacao} nao encontrada.")
+        try:
+            solicitacao = next(s for s in self.solicitacoes if s.id_solicitacao == id_solicitacao)
+            solicitacao.atualizar_status("Recusada")
+            print(f"Solicitação {id_solicitacao} recusada por {self.nome}.")
+            self.historico.adicionar_registro(solicitacao)
+        except StopIteration:
+            raise IDNaoEncontradoError(f"Solicitação com ID {id_solicitacao} não encontrada.")
 
     def concluir_transporte(self, id_solicitacao):
-        """
-        Conclui o transporte e atualiza o status.
-        """
-        for solicitacao in self.solicitacoes:
-            if solicitacao.id_solicitacao == id_solicitacao:
-                solicitacao.atualizar_status("Chegou ao destino")
-                print(f"Solicitacao {id_solicitacao} concluída por {self.nome}.")
-                self.historico.adicionar_registro(solicitacao)
-                return
-        print(f"Solicitação {id_solicitacao} nao encontrada.")
+        try:
+            solicitacao = next(s for s in self.solicitacoes if s.id_solicitacao == id_solicitacao)
+            solicitacao.atualizar_status("Chegou ao destino")
+            print(f"Solicitação {id_solicitacao} concluída por {self.nome}.")
+            self.historico.adicionar_registro(solicitacao)
+        except StopIteration:
+            raise IDNaoEncontradoError(f"Solicitação com ID {id_solicitacao} não encontrada.")
 
     def relatar_incidente(self, id_solicitacao, descricao):
-        """
-        Relata um incidente associado a uma solicitacao.
-        """
-        for solicitacao in self.solicitacoes:
-            if solicitacao.id_solicitacao == id_solicitacao:
-                solicitacao.registrar_incidente(descricao, self)
-                solicitacao.atualizar_status("Incidente relatado")
-                print(f"Incidente relatado na solicitacao {id_solicitacao}: {descricao}.")
-                self.historico.adicionar_registro(solicitacao)
-                return
-        print(f"Solicitacao {id_solicitacao} nao encontrada.")
+        try:
+            solicitacao = next(s for s in self.solicitacoes if s.id_solicitacao == id_solicitacao)
+            solicitacao.registrar_incidente(descricao, self)
+            solicitacao.atualizar_status("Incidente relatado")
+            print(f"Incidente relatado na solicitação {id_solicitacao}: {descricao}.")
+            self.historico.adicionar_registro(solicitacao)
+        except StopIteration:
+            raise IDNaoEncontradoError(f"Solicitação com ID {id_solicitacao} não encontrada.")
 
 
 
@@ -245,29 +240,57 @@ def executar_menu_maqueiro(maqueiro):
         menu_maqueiro(maqueiro)
         escolha_maqueiro = input("Escolha uma opção: ").strip()
 
-        if escolha_maqueiro == '1':
-            maqueiro.visualizar_solicitacoes()
-        elif escolha_maqueiro == '2':
-            id_solicitacao = input("Digite o ID da solicitacao para aceitar: ").strip()
-            maqueiro.aceitar_solicitacao(id_solicitacao)
-        elif escolha_maqueiro == '3':
-            id_solicitacao = input("Digite o ID da solicitacao para recusar: ").strip()
-            maqueiro.recusar_solicitacao(id_solicitacao)
-        elif escolha_maqueiro == '4':
-            id_solicitacao = input("Digite o ID da solicitacao para atualizar: ").strip()
-            nova_prioridade = input("Digite a nova prioridade (Alta, Média, Baixa) ou deixe em branco para nao alterar: ").strip()
-            novo_destino = input("Digite o novo destino ou deixe em branco para nao alterar: ").strip()
-            novo_status = input("Digite o novo status (Em transporte, Recusada, Chegou ao destino) ou deixe em branco para nao alterar: ").strip()
-            maqueiro.atualizar_solicitacao(id_solicitacao, nova_prioridade, novo_destino, novo_status)
-        elif escolha_maqueiro == '5':
-            id_solicitacao = input("Digite o ID da solicitacao para concluir: ").strip()
-            maqueiro.concluir_transporte(id_solicitacao)
-        elif escolha_maqueiro == '6':
-            maqueiro.historico.visualizar_historico()
-        elif escolha_maqueiro == '7':
-            break
-        else:
-            print("Opção inválida. Escolha entre 1 e 7.")
+        try:
+            if escolha_maqueiro == '1':
+                maqueiro.visualizar_solicitacoes()
+            elif escolha_maqueiro == '2':
+                id_solicitacao = input("Digite o ID da solicitação para aceitar: ").strip()
+                maqueiro.aceitar_solicitacao(id_solicitacao)
+            elif escolha_maqueiro == '3':
+                id_solicitacao = input("Digite o ID da solicitação para recusar: ").strip()
+                maqueiro.recusar_solicitacao(id_solicitacao)
+            elif escolha_maqueiro == '4':
+                id_solicitacao = input("Digite o ID da solicitação para relatar incidente: ").strip()
+                descricao = input("Digite a descrição do incidente: ").strip()
+                maqueiro.relatar_incidente(id_solicitacao, descricao)
+            elif escolha_maqueiro == '5':
+                id_solicitacao = input("Digite o ID da solicitação para concluir: ").strip()
+                maqueiro.concluir_transporte(id_solicitacao)
+            elif escolha_maqueiro == '6':
+                maqueiro.historico.visualizar_historico()
+            elif escolha_maqueiro == '7':
+                break
+            else:
+                raise OperacaoInvalidaError("Opção inválida. Escolha entre 1 e 7.")
+        except (IDNaoEncontradoError, OperacaoInvalidaError) as e:
+            print(f"Erro: {e}")
+        except Exception as e:
+            print(f"Ocorreu um erro inesperado: {e}")
+
+def listar_pacientes(sistema_transporte):
+    try:
+        if not sistema_transporte.solicitacoes:
+            print("\nNenhum paciente cadastrado no sistema.")
+            return
+        print("\n--- Lista de Pacientes ---")
+        for solicitacao in sistema_transporte.solicitacoes:
+            paciente = solicitacao.paciente
+            print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localização: {paciente.localizacao}, Status: {paciente.status}")
+    except Exception as e:
+        print(f"Erro ao listar pacientes: {e}")
+
+
+def listar_solicitacoes(sistema_transporte):
+    try:
+        if not sistema_transporte.solicitacoes:
+            print("\nNenhuma solicitação cadastrada no sistema.")
+            return
+        print("\n--- Lista de Solicitações ---")
+        for solicitacao in sistema_transporte.solicitacoes:
+            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
+                  f"Destino: {solicitacao.destino}, Prioridade: {solicitacao.prioridade}, Status: {solicitacao.status}")
+    except Exception as e:
+        print(f"Erro ao listar solicitações: {e}")           
 
 # Função para exibir o menu de administrador
 def menu_admin():
