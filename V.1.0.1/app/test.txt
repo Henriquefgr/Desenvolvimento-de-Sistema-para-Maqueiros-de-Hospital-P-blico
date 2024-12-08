@@ -16,7 +16,7 @@ Entrada: Um paciente e um destino com prioridade.
 Resultado Esperado: A solicitação deve ser criada corretamente com os dados do paciente, destino e prioridade.
 Resultado Obtido: Teste passou corretamente.
 
-Teste 2: Aceitar Solicitação
+Teste 2: Aceitar Solicitaçao
 Entrada: Solicitação criada anteriormente, com ID conhecido.
 Resultado Esperado: A solicitação deve ter seu status alterado para "Em transporte", e o status do paciente também deve ser alterado.
 Resultado Obtido: Teste passou corretamente, o status foi atualizado como esperado.
