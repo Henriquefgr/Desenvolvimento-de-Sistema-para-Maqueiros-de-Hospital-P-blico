@@ -1,128 +1,125 @@
-Manual de Usuário - Sistema de Transporte de Pacientes
-Descrição Geral
-O sistema gerencia o transporte de pacientes dentro de um ambiente hospitalar. Ele permite que administradores e maqueiros realizem diversas operações, como autenticação, gerenciamento de solicitações de transporte, e registro de incidentes.
+Manual do Usuário para o Sistema de Transporte de Pacientes
+Bem-vindo ao Sistema de Transporte de Pacientes! Este manual irá guiá-lo sobre como usar o sistema, abordando suas funcionalidades principais, como autenticação, registro de solicitações, gerenciamento de transporte e relatórios.
 
-Principais Funcionalidades
-1. Autenticação
-O sistema suporta autenticação baseada em usuários cadastrados previamente, permitindo diferentes permissões dependendo da função:
+1. Objetivo do Sistema
+O sistema é projetado para gerenciar solicitações de transporte de pacientes em um hospital. Ele permite:
 
-Admin: Visualiza maqueiros e gerencia o sistema.
-Maqueiro: Aceita, recusa e conclui solicitações de transporte e registra incidentes.
-2. Gerenciamento de Pacientes e Solicitações
-O sistema armazena informações de pacientes, gerencia solicitações de transporte e permite visualizar histórico de eventos relacionados.
+Gerenciar pacientes e solicitações de transporte.
+Priorizar solicitações com base em níveis de urgência.
+Registrar incidentes durante o transporte.
+Exibir históricos e detalhes de solicitações.
+2. Requisitos para Utilização
+Python instalado (versão >= 3.7 recomendada).
+As bibliotecas tkinter, ttkbootstrap, e unittest devem estar instaladas.
+Para instalar o ttkbootstrap, use o comando:
 
-3. Registro e Visualização de Incidentes
-Maqueiros podem registrar incidentes que ocorram durante o transporte e visualizar os detalhes.
+bash
+Copiar código
+pip install ttkbootstrap
+3. Funcionalidades Principais
+3.1 Tela de Login
+Descrição: A tela de login é a entrada do sistema. Apenas usuários registrados podem acessar as funcionalidades.
 
-4. Histórico de Solicitações
-As ações realizadas sobre as solicitações (aceitar, recusar, concluir, incidentes) são registradas para consulta posterior.
+Ações:
 
-Instruções de Uso
-Passo 1: Iniciar o Sistema
-Execute o código Python em um ambiente compatível. O menu principal será exibido.
+Insira seu nome de usuário e senha.
+Clique em "Entrar".
+Usuários padrão do sistema:
 
-Passo 2: Navegar pelo Menu Principal
-Opção 1: Autenticar-se
-Insira seu nome de usuário e senha para acessar o sistema.
+Admin:
+Usuário: admin
+Senha: adminpass
+Maqueiro:
+Usuário: maqueiro1
+Senha: senha123
+Erros: Caso o login falhe, você verá uma mensagem informando que o usuário ou senha está incorreto.
 
-Caso seja maqueiro, será direcionado ao menu de maqueiros.
-Caso seja administrador, será direcionado ao menu de administradores.
-Opção 2: Listar Pacientes
-Exibe uma lista de todos os pacientes cadastrados no sistema, incluindo:
+3.2 Interface do Maqueiro
+Após o login como maqueiro, você terá acesso às seguintes funcionalidades:
 
-ID do Paciente
-Nome
-Localização
-Status (ex.: aguardando transporte, em transporte)
-Opção 3: Listar Todas as Solicitações
-Exibe uma lista com informações detalhadas de todas as solicitações de transporte no sistema.
+Visualizar Solicitações:
 
-Opção 4: Sair
-Finaliza o programa.
+Lista todas as solicitações atribuídas, exibindo:
+ID da solicitação.
+Nome do paciente.
+Destino.
+Prioridade.
+Status.
+Registrar Incidente:
 
-Funcionalidades do Maqueiro
-Após autenticação, o maqueiro terá acesso às seguintes opções:
+Relata problemas durante o transporte.
+Procedimento:
+Insira o ID da solicitação.
+Escreva uma descrição do incidente.
+Concluir Transporte:
 
-Visualizar Solicitações Lista todas as solicitações de transporte atribuídas ao maqueiro, ordenadas por prioridade.
+Atualiza o status da solicitação como "Chegou ao destino".
+Procedimento:
+Insira o ID da solicitação para confirmar a conclusão.
+Sair:
 
-Aceitar Solicitação Permite aceitar uma solicitação informando o ID.
-O status da solicitação será atualizado para "Em transporte".
+Retorna à tela de login.
+3.3 Interface do Administrador
+Após o login como admin, funcionalidades adicionais podem ser integradas, como gerenciamento de maqueiros, visualização de históricos ou relatórios avançados. No entanto, estas ações específicas dependem de futuras extensões do sistema.
 
-Recusar Solicitação Permite recusar uma solicitação informando o ID.
-O status será atualizado para "Recusada".
+4. Fluxo de Operações
+Login no Sistema:
 
-Relatar Incidente Permite registrar um incidente relacionado a uma solicitação. Informações necessárias:
+Acesse o sistema com as credenciais fornecidas.
+Gerenciamento de Solicitações (apenas para maqueiros):
 
-ID da solicitação
-Descrição do incidente
-O status será atualizado para "Incidente relatado".
-Concluir Transporte Finaliza a solicitação, alterando o status para "Chegou ao destino".
+Visualize solicitações e suas informações detalhadas.
+Registre incidentes em solicitações específicas.
+Atualize o status da solicitação conforme as ações realizadas.
+Histórico de Solicitações:
 
-Visualizar Histórico Exibe um histórico detalhado de todas as solicitações e incidentes associados.
+Todas as solicitações finalizadas ou incidentes registrados são armazenados no histórico.
+5. Regras de Funcionamento
+Solicitações:
 
-Voltar ao Menu Principal Retorna ao menu inicial.
+São criadas para pacientes e incluem informações como:
+Nome do paciente.
+Destino (ex.: sala de exames).
+Prioridade (Alta, Média, Baixa).
+O status inicial é "Aguardando transporte".
+Maqueiros:
 
-Funcionalidades do Administrador
-Após autenticação, o administrador terá acesso às seguintes opções:
+Gerenciam as solicitações atribuídas a eles.
+Podem aceitar, recusar, ou concluir solicitações.
+Incidentes:
 
-Visualizar Todos os Maqueiros Lista os maqueiros cadastrados no sistema, com informações como:
+Devem ser registrados detalhadamente com uma descrição clara do problema.
+6. Estrutura de Arquivos
+main.py: Arquivo principal que contém a interface gráfica e o sistema de transporte.
+unittest: Classe para testes automatizados do sistema.
+7. Mensagens de Erro e Solução
+Erro	Causa	Solução
+Usuário ou senha inválidos!	Credenciais incorretas.	Verifique o nome de usuário e senha.
+Solicitação não encontrada.	ID da solicitação fornecido é inválido.	Confira se o ID digitado está correto.
+Descrição do incidente é vazia.	Nenhuma descrição foi fornecida para o incidente.	Escreva um detalhe claro sobre o incidente.
+ttkbootstrap não instalado	Dependência ausente.	Instale com pip install ttkbootstrap.
+8. Dicas para Uso
+Evite fechar o sistema abruptamente para evitar perda de dados.
+Insira informações completas (principalmente ao registrar incidentes).
+Use senhas fortes para proteger o acesso ao sistema.
+9. Testes Automatizados
+O sistema possui testes para verificar funcionalidades principais, como:
 
-ID do Maqueiro
-Nome
-Voltar ao Menu Principal Retorna ao menu inicial.
+Criação de solicitações.
+Aceitação, recusa e conclusão de transportes.
+Registro de incidentes.
+Como Executar os Testes:
+Abra o terminal.
+Execute o comando:
+bash
+Copiar código
+python main.py
+Verifique os resultados dos testes no terminal.
+10. Contato para Suporte
+Para dúvidas ou suporte técnico, entre em contato com a equipe de desenvolvimento.
 
-Gerenciamento de Pacientes e Solicitações
-Cadastrar Paciente
-Pacientes são adicionados ao sistema no código ou por administradores.
 
-Criar Solicitação
-O sistema gera automaticamente solicitações associadas aos pacientes.
-As solicitações incluem:
-Paciente
-Destino (ex.: Raio-X, Tomografia)
-Prioridade (Alta, Média, Baixa)
-Estrutura de Dados
-Pacientes
-Cada paciente possui:
 
-ID único
-Nome
-Localização
-Status (ex.: aguardando transporte)
-Solicitações de Transporte
-Cada solicitação possui:
 
-ID único
-Paciente associado
-Destino
-Prioridade
-Status atual
-Registro de incidentes (se houver)
-Maqueiros
-Cada maqueiro gerencia um conjunto de solicitações e possui um histórico detalhado.
 
-Histórico
-O histórico armazena:
 
-Solicitações processadas
-Incidentes relatados, incluindo descrição e maqueiro responsável.
-Fluxo de Operações
-Administrador
-
-Visualiza maqueiros.
-Gera pacientes e solicitações no início.
-Maqueiro
-
-Gerencia as solicitações atribuídas.
-Registra incidentes durante o transporte.
-Consulta histórico de ações.
-Erros Comuns e Soluções
-"Falha na autenticação"
-
-Verifique se o nome de usuário e a senha estão corretos.
-"Solicitação não encontrada"
-
-Certifique-se de digitar o ID correto.
-"Usuário já cadastrado"
-
-Tente usar um nome de usuário único ao adicionar usuários.

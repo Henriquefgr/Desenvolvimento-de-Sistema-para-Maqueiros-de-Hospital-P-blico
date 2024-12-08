@@ -2,6 +2,7 @@ import hashlib
 import uuid
 import datetime
 import unittest
+from tkinter import messagebox, simpledialog
 
 # Classes de Autenticação
 
@@ -13,7 +14,7 @@ class Usuario:
         self.username = username
         # A senha é armazenada como um hash para maior segurança
         self.password_hash = hashlib.sha256(password.encode()).hexdigest()
-        self.role = role  # Role pode ser "maqueiro" ou "admin"
+        self.role = role  
 
     def verificar_senha(self, password):
         """
@@ -199,193 +200,175 @@ class SistemaTransporte:
         self.solicitacoes.sort(key=lambda x: x.prioridade)  # Ordena globalmente por prioridade
         return solicitacao
 
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+from tkinter import messagebox, simpledialog
 
-# Funções de CLI
 
-# Função para exibir o menu principal
-def exibir_menu():
-    print("\n--- Menu Principal ---")
-    print("1. Autenticar-se")
-    print("2. Listar Pacientes")
-    print("3. Listar Todas as Solicitacoes")
-    print("4. Sair")
+class SistemaGUI:
+    def __init__(self, root, sistema_transporte, auth_system):
+        self.root = root
+        self.sistema_transporte = sistema_transporte
+        self.auth_system = auth_system
+        self.usuario_autenticado = None
 
-# Função para listar todos os pacientes cadastrados
-def listar_pacientes(sistema_transporte):
-    print("\n--- Lista de Pacientes ---")
-    for solicitacao in sistema_transporte.solicitacoes:
-        paciente = solicitacao.paciente
-        print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localizacao: {paciente.localizacao}, Status: {paciente.status}")
+        # Configuração inicial
+        self.root.title("Sistema de Transporte de Pacientes")
+        self.root.geometry("800x600")
 
-# Função para listar todas as solicitações
-def listar_solicitacoes(sistema_transporte):
-    print("\n--- Lista de Solicitacoes ---")
-    for solicitacao in sistema_transporte.solicitacoes:
-        print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, Destino: {solicitacao.destino}, Prioridade: {solicitacao.prioridade}, Status: {solicitacao.status}")
+        # Tela inicial
+        self.tela_login()
 
-# Função de menu para o maqueiro
-def menu_maqueiro(maqueiro):
-    print(f"\n--- Bem-vindo, {maqueiro.nome} ---")
-    print("1. Visualizar Solicitacoes")
-    print("2. Aceitar Solicitacao (Forneça o ID da solicitacao)")
-    print("3. Recusar Solicitacao (Forneça o ID da solicitacao)")
-    print("4. Atualizar Solicitacao (Forneça o ID e os dados a serem atualizados)")
-    print("5. Concluir Transporte (Forneça o ID da solicitacao)")
-    print("6. Visualizar Historico")
-    print("7. Voltar ao Menu Principal")
+    def tela_login(self):
+        # Limpar tela
+        self.limpar_tela()
 
-# menu do maqueiro
-def executar_menu_maqueiro(maqueiro):
-    while True:
-        menu_maqueiro(maqueiro)
-        escolha_maqueiro = input("Escolha uma opção: ").strip()
+        # Criar widgets
+        ttk.Label(self.root, text="Login", font=("Arial", 16), bootstyle="primary").pack(pady=20)
 
-        try:
-            if escolha_maqueiro == '1':
-                maqueiro.visualizar_solicitacoes()
-            elif escolha_maqueiro == '2':
-                id_solicitacao = input("Digite o ID da solicitação para aceitar: ").strip()
-                maqueiro.aceitar_solicitacao(id_solicitacao)
-            elif escolha_maqueiro == '3':
-                id_solicitacao = input("Digite o ID da solicitação para recusar: ").strip()
-                maqueiro.recusar_solicitacao(id_solicitacao)
-            elif escolha_maqueiro == '4':
-                id_solicitacao = input("Digite o ID da solicitação para relatar incidente: ").strip()
-                descricao = input("Digite a descrição do incidente: ").strip()
-                maqueiro.relatar_incidente(id_solicitacao, descricao)
-            elif escolha_maqueiro == '5':
-                id_solicitacao = input("Digite o ID da solicitação para concluir: ").strip()
-                maqueiro.concluir_transporte(id_solicitacao)
-            elif escolha_maqueiro == '6':
-                maqueiro.historico.visualizar_historico()
-            elif escolha_maqueiro == '7':
-                break
+        ttk.Label(self.root, text="Usuário:").pack(pady=5)
+        self.entry_username = ttk.Entry(self.root, bootstyle="info")
+        self.entry_username.pack(pady=5)
+
+        ttk.Label(self.root, text="Senha:").pack(pady=5)
+        self.entry_password = ttk.Entry(self.root, show="*", bootstyle="info")
+        self.entry_password.pack(pady=5)
+
+        ttk.Button(self.root, text="Entrar", command=self.autenticar_usuario, bootstyle="success").pack(pady=10)
+
+    def autenticar_usuario(self):
+        username = self.entry_username.get().strip()
+        password = self.entry_password.get().strip()
+        self.usuario_autenticado = self.auth_system.autenticar(username, password)
+
+        if self.usuario_autenticado:
+            if self.usuario_autenticado.role == "maqueiro":
+                self.tela_maqueiro()
+            elif self.usuario_autenticado.role == "admin":
+                self.tela_admin()
+        else:
+            messagebox.showerror("Erro de Login", "Usuário ou senha inválidos!")
+
+    def tela_maqueiro(self):
+        # Limpar tela
+        self.limpar_tela()
+
+        ttk.Label(self.root, text=f"Bem-vindo, {self.usuario_autenticado.username}", font=("Arial", 16),
+                  bootstyle="primary").pack(pady=20)
+        ttk.Button(self.root, text="Visualizar Solicitações", command=self.visualizar_solicitacoes,
+                   bootstyle="info").pack(pady=5)
+        ttk.Button(self.root, text="Registrar Incidente", command=self.registrar_incidente,
+                   bootstyle="warning").pack(pady=5)
+        ttk.Button(self.root, text="Concluir Transporte", command=self.concluir_transporte,
+                   bootstyle="success").pack(pady=5)
+        ttk.Button(self.root, text="Sair", command=self.tela_login, bootstyle="danger").pack(pady=20)
+
+    def visualizar_solicitacoes(self):
+        # Limpar tela
+        self.limpar_tela()
+
+        ttk.Label(self.root, text="Solicitações de Transporte", font=("Arial", 16), bootstyle="primary").pack(pady=20)
+
+        frame = ttk.Treeview(self.root, columns=("ID", "Paciente", "Destino", "Prioridade", "Status"), show="headings",
+                             bootstyle="info")
+        frame.heading("ID", text="ID")
+        frame.heading("Paciente", text="Paciente")
+        frame.heading("Destino", text="Destino")
+        frame.heading("Prioridade", text="Prioridade")
+        frame.heading("Status", text="Status")
+        frame.pack(fill="both", expand=True)
+
+        for solicitacao in self.sistema_transporte.solicitacoes:
+            frame.insert("", "end", values=(
+                solicitacao.id_solicitacao,
+                solicitacao.paciente.nome,
+                solicitacao.destino,
+                solicitacao.prioridade,
+                solicitacao.status,
+            ))
+
+        ttk.Button(self.root, text="Voltar", command=self.tela_maqueiro, bootstyle="secondary").pack(pady=10)
+
+    def registrar_incidente(self):
+        self.exibir_prompt("Digite o ID da solicitação para registrar um incidente:", self.realizar_registro_incidente)
+
+    def realizar_registro_incidente(self, id_solicitacao):
+        solicitacao = self.buscar_solicitacao(id_solicitacao)
+        if solicitacao:
+            incidente = self.exibir_prompt_texto("Descreva o incidente:")
+            if incidente:
+                self.usuario_autenticado.relatar_incidente(solicitacao.id_solicitacao, incidente)
+                messagebox.showinfo("Sucesso", f"Incidente registrado para {solicitacao.paciente.nome}")
             else:
-                raise OperacaoInvalidaError("Opção inválida. Escolha entre 1 e 7.")
-        except (IDNaoEncontradoError, OperacaoInvalidaError) as e:
-            print(f"Erro: {e}")
-        except Exception as e:
-            print(f"Ocorreu um erro inesperado: {e}")
+                messagebox.showerror("Erro", "Descrição do incidente não pode ser vazia.")
+        else:
+            messagebox.showerror("Erro", "Solicitação não encontrada.")
 
-def listar_pacientes(sistema_transporte):
-    try:
-        if not sistema_transporte.solicitacoes:
-            print("\nNenhum paciente cadastrado no sistema.")
-            return
-        print("\n--- Lista de Pacientes ---")
-        for solicitacao in sistema_transporte.solicitacoes:
-            paciente = solicitacao.paciente
-            print(f"ID: {paciente.id_paciente}, Nome: {paciente.nome}, Localização: {paciente.localizacao}, Status: {paciente.status}")
-    except Exception as e:
-        print(f"Erro ao listar pacientes: {e}")
+    def concluir_transporte(self):
+        self.exibir_prompt("Digite o ID da solicitação para concluir:", self.realizar_conclusao_transporte)
+
+    def realizar_conclusao_transporte(self, id_solicitacao):
+        solicitacao = self.buscar_solicitacao(id_solicitacao)
+        if solicitacao:
+            self.usuario_autenticado.concluir_transporte(solicitacao.id_solicitacao)
+            messagebox.showinfo("Sucesso", f"Transporte concluído para {solicitacao.paciente.nome}")
+        else:
+            messagebox.showerror("Erro", "Solicitação não encontrada.")
+
+    def exibir_prompt(self, mensagem, callback):
+        # Janela de entrada para obter o ID de uma solicitação
+        janela_prompt = ttk.Toplevel(self.root)
+        janela_prompt.title("Entrada")
+        janela_prompt.geometry("300x200")
+
+        ttk.Label(janela_prompt, text=mensagem, bootstyle="info").pack(pady=10)
+        entry = ttk.Entry(janela_prompt, bootstyle="primary")
+        entry.pack(pady=5)
+
+        def confirmar():
+            callback(entry.get())
+            janela_prompt.destroy()
+
+        ttk.Button(janela_prompt, text="Confirmar", command=confirmar, bootstyle="success").pack(pady=10)
+
+    def exibir_prompt_texto(self, mensagem):
+        # Retorna o texto digitado pelo usuário
+        return simpledialog.askstring("Entrada", mensagem)
+
+    def buscar_solicitacao(self, id_solicitacao):
+        # Encontra a solicitação pelo ID
+        for solicitacao in self.sistema_transporte.solicitacoes:
+            if solicitacao.id_solicitacao == id_solicitacao:
+                return solicitacao
+        return None
+
+    def limpar_tela(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
 
-def listar_solicitacoes(sistema_transporte):
-    try:
-        if not sistema_transporte.solicitacoes:
-            print("\nNenhuma solicitação cadastrada no sistema.")
-            return
-        print("\n--- Lista de Solicitações ---")
-        for solicitacao in sistema_transporte.solicitacoes:
-            print(f"ID: {solicitacao.id_solicitacao}, Paciente: {solicitacao.paciente.nome}, "
-                  f"Destino: {solicitacao.destino}, Prioridade: {solicitacao.prioridade}, Status: {solicitacao.status}")
-    except Exception as e:
-        print(f"Erro ao listar solicitações: {e}")           
-
-# Função para exibir o menu de administrador
-def menu_admin():
-    print("\n--- Bem-vindo, Administrador ---")
-    print("1. Visualizar Todos os Maqueiros")
-    print("2. Voltar ao Menu Principal")
-
-# Função principal que executa o CLI
-def executar_cli():
-    # Sistema de autenticação
+# Configuração inicial
+if __name__ == "__main__":
     auth_system = SistemaAutenticacao()
     auth_system.adicionar_usuario(Usuario("maqueiro1", "senha123", "maqueiro"))
     auth_system.adicionar_usuario(Usuario("admin", "adminpass", "admin"))
-    
-    # Sistema de transporte
-    historico = HistoricoSolicitacoes()
-    maqueiro = Maqueiro("João", historico)
+
     sistema_transporte = SistemaTransporte()
+    historico = HistoricoSolicitacoes()
+
+    maqueiro = Maqueiro("João", historico)
     sistema_transporte.adicionar_maqueiro(maqueiro)
-    
-    # Criando pacientes e solicitações
+
     paciente1 = Paciente("Paciente 1", "Sala 101")
     paciente2 = Paciente("Paciente 2", "Sala 102")
-    solicitacao1 = sistema_transporte.criar_solicitacao(paciente1, "Raio-X", "Alta")
-    solicitacao2 = sistema_transporte.criar_solicitacao(paciente2, "Tomografia", "Média")
-    
-    maqueiro.solicitacoes.append(solicitacao1)
-    maqueiro.solicitacoes.append(solicitacao2)
-    
-    # Loop principal da CLI
-    while True:
-        exibir_menu()
-        escolha = input("Escolha uma opção: ").strip()
-        
-        if escolha == '1':
-            # Autenticação
-            username = input("Digite o nome de usuário: ").strip()
-            password = input("Digite a senha: ").strip()
-            
-            usuario_autenticado = auth_system.autenticar(username, password)
-            if usuario_autenticado:
-                if usuario_autenticado.role == "maqueiro":
-                    while True:
-                        menu_maqueiro(maqueiro)
-                        escolha_maqueiro = input("Escolha uma opção: ").strip()
-                        
-                        if escolha_maqueiro == '1':
-                            maqueiro.visualizar_solicitacoes()
-                        elif escolha_maqueiro == '2':
-                            id_solicitacao = input("Digite o ID da solicitação para aceitar: ").strip()
-                            maqueiro.aceitar_solicitacao(id_solicitacao)
-                        elif escolha_maqueiro == '3':
-                            id_solicitacao = input("Digite o ID da solicitação para recusar: ").strip()
-                            maqueiro.recusar_solicitacao(id_solicitacao)
-                        elif escolha_maqueiro == '4':
-                            id_solicitacao = input("Digite o ID da solicitação para relatar incidente: ").strip()
-                            descricao = input("Digite a descrição do incidente: ").strip()
-                            maqueiro.relatar_incidente(id_solicitacao, descricao)
-                        elif escolha_maqueiro == '5':
-                            id_solicitacao = input("Digite o ID da solicitação para concluir: ").strip()
-                            maqueiro.concluir_transporte(id_solicitacao)
-                        elif escolha_maqueiro == '6':
-                            historico.visualizar_historico()
-                        elif escolha_maqueiro == '7':
-                            break
-                        else:
-                            print("Opção inválida. Escolha entre 1 e 7.")
-                elif usuario_autenticado.role == "admin":
-                    while True:
-                        menu_admin()
-                        escolha_admin = input("Escolha uma opção: ").strip()
-                        
-                        if escolha_admin == '1':
-                            print("\nLista de Maqueiros:")
-                            for maqueiro in sistema_transporte.maqueiros:
-                                print(f"ID: {maqueiro.id_maqueiro}, Nome: {maqueiro.nome}")
-                        elif escolha_admin == '2':
-                            break
-                        else:
-                            print("Opção inválida. Escolha entre 1 e 2.")
-            else:
-                print("Falha na autenticação. Verifique o nome de usuário e a senha.")
-        elif escolha == '2':
-            listar_pacientes(sistema_transporte)
-        elif escolha == '3':
-            listar_solicitacoes(sistema_transporte)
-        elif escolha == '4':
-            print("Saindo do sistema.")
-            break
-        else:
-            print("Opção inválida. Escolha entre 1 e 4.")
+    sistema_transporte.criar_solicitacao(paciente1, "Raio-X", "Alta")
+    sistema_transporte.criar_solicitacao(paciente2, "Tomografia", "Média")
 
-# Iniciar o sistema CLI
-if __name__ == "__main__":
-    executar_cli()
+    root = ttk.Window(themename="darkly")  # Modernização com tema da biblioteca ttkbootstrap
+    app = SistemaGUI(root, sistema_transporte, auth_system)
+    root.mainloop()
+
+
 
 # Implementação de testes automatizados
 

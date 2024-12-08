@@ -1,0 +1,10 @@
+No código fornecido, as credenciais dos usuários foram configuradas como segue:
+
+Maqueiro
+
+Username: maqueiro1
+Senha: senha123
+Admin
+
+Username: admin
+Senha: adminpass
